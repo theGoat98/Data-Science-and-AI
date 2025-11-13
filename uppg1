@@ -1,0 +1,20 @@
+# Codegrade Tag Question1
+# Do *not* remove the tag above
+# Implement the extract_files function below
+from zipfile import ZipFile
+
+def extract_files(zipfilename):
+    years = {}
+    with ZipFile(zipfilename, 'r') as zip_object:
+        #zip_object.printdir()
+        
+        for name in zip_object.namelist():
+            for r in range(2013, 2025):
+                if str(r) in name:
+                    with zip_object.open(name) as file:
+                        content = file.read().decode('utf-8')
+                    years[r] = content
+    return years
+            
+
+data = extract_files('gothenburg_sold_apartments.zip')
