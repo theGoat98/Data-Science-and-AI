@@ -1,0 +1,33 @@
+
+from bs4 import BeautifulSoup
+
+def extract_announcements(page):
+    print("hello")
+
+    soup = BeautifulSoup(page,"html.parser")
+    names = list() 
+
+    
+    for cell in soup.find_all(class_="property-details"): 
+        names.append(cell.text.strip()) 
+    
+    print(soup)
+    return names
+    """
+    Extract all announcements from a single page (the entire page is supplied as a string)
+    Returns the announcements as a Pandas dataframe.
+    The dataframe shall have one row per announcement in the HTML page and the following columns:
+    - address
+    - date
+    - district
+    - municipality
+    - price
+    - area
+    - rooms
+    - floor
+
+    Parameters:
+    page -- content of the HTML page as a string
+    """
+    #soup = BeautifulSoup(page,features='html.parser') # this will suppress a warning about not specifying the default parser
+print(extract_announcements(data[2019]))
