@@ -148,16 +148,20 @@ def extract_announcements(page):
 
             if label == "datum": # om nyckeln är datum 
                 data["date"] = fix_date(value) # gör till date
+                
 
             elif label == "område": # om det blir område, ex: "Lägenhet · Kortedala · Göteborg"
                 parts2 = [x.strip() for x in value.split("·")] # ta bort onödiga mellanslag och punkter
-                if len(parts2) >= 3: # om längden är som i exemplet
-                    data["district"] = parts2[-2] # näst sista
-                    data["municipality"] = parts2[-1] # sista
-                elif len(parts2) == 2: # om den är två
-                    data["district"] = parts2[0]
-                    data["municipality"] = parts2[1]
-
+                    # Ta bort "Lägenhet" om det ligger först
+                if parts2 and parts2[0].lower() == "lägenhet":
+                    parts2 = parts2[1:]
+                if len(parts2) >= 2: # om district och municipality finns
+                    data["district"] = parts2[0] if parts2[0] != "" else None 
+                    data["municipality"] = parts2[1] 
+                elif len(parts2) == 1: # om endast municipality finns 
+                    data["district"] = None
+                    data["municipality"] = parts2[0]
+                    
             elif label == "pris":
                 # plocka bara siffror ur "1 400 000 kr"
                 digits = re.sub(r"\D", "", value) # /D ickesiffra, ersätts med "" (tom string)
@@ -192,21 +196,6 @@ def extract_announcements(page):
     df["date"] = pd.to_datetime(df["date"]) # fixa dates
 
     return df
-
-# testing
-
-test_html = """
-<div class="property-card">
-  <h3 class="property-title">Danska Vägen 12A</h3>
-  <div class="property-details">
-    <p><strong>Datum:</strong> 29 december 2014</p>
-    <p><strong>Område:</strong> Lägenhet · Kortedala · Göteborg</p>
-    <p><strong>Pris:</strong> 1 450 000 kr</p>
-    <p><strong>Storlek:</strong> 64½ m²</p>
-    <p><strong>Rum:</strong> 2½ rum</p>
-    <p><strong>Våning:</strong> vån 3</p>
-  </div>
-</div>
 """
 
 df_test = extract_announcements(test_html)
