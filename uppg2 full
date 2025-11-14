@@ -1,0 +1,213 @@
+# Codegrade Tag Question2
+# Do *not* remove the tag above
+# Implement the extract_announcements function below
+
+from bs4 import BeautifulSoup
+import pandas as pd
+import numpy as np
+import re
+from datetime import date
+
+# Hjälpfunktioner
+# Svenska månadsnamn -> månadstal
+month_dict = { # skapar en dictionary
+    'januari': 1, 'februari': 2, 'mars': 3, 'april': 4,
+    'maj': 5, 'juni': 6, 'juli': 7, 'augusti': 8,
+    'september': 9, 'oktober': 10, 'november': 11, 'december': 12
+}
+
+def fix_date(s): # tar in en datum (string)
+    """Ex: '29 december 2014' -> datetime.date"""
+    s = s.strip() # tar bort mellanslag i början eller slutet av strängen
+    parts = s.split() # delar upp strängen i en lista av ord
+    if len(parts) < 3:
+        return pd.NaT # 3 delar behövs för att vara ett valid datum
+    
+    day = int(parts[0]) # day blir den första
+    month = month_dict.get(parts[1].lower(), 1) # month blir den andra genom month_dict
+    year = int(parts[2]) # year blir den tredje 
+    return date(year, month, day) # returnerar datumet som date
+
+def fix_frac(s): # tar in s (string som är ett tal)
+    """
+    Hanterar tal som '68 m²', '64½ m²', '1½ rum', '2,5' osv.
+    Returnerar float eller NaN.
+    """
+    if s is None:
+        return np.nan # skyddar mot att funktionen kraschar
+    low = s.lower() # gör stringen till små bokstäver
+    # tomt-uppgifter ska ignoreras
+    if 'tomt' in low:
+        return np.nan # alltså om det blir tomtinformation istället för lägenhetsinformation
+
+    s_clean = re.sub(r'\b(m²|m2|m\^2|rum)\b', '', s, flags=re.IGNORECASE).strip() # ta bort enheter och ersätt med mellanslag
+    s_clean = s_clean.replace(',', '.') # ersätt komma med punkt
+    frac_map = {'½': 0.5, '¼': 0.25, '¾': 0.75} # unicode-bråk dicationary
+    # om vi har ett "vanligt" decimaltal, använd det
+    m_dec = re.search(r'\d+\.\d+', s_clean) # en elelr flera siffror . en eller flera siffror
+    if m_dec:
+        try:
+            return float(m_dec.group(0)) # testa returnera direkt
+        except ValueError:
+            pass
+     # annars format som 90½, 1½ etc. 
+    m = re.search(r'(\d+)([½¼¾]?)', s_clean) # letar efter mönster i strängen s_clean, (\d+) blir heltalsdelen och ([½¼¾]?) betyder en grupp med dessa, ? eftersom det kan finnas
+    if m: # om m finns så gå in i kod
+        val = float(m.group(1)) # sätt val till heltalsdelen
+        if m.group(2) in frac_map:
+            val += frac_map[m.group(2)]
+        return float(val)
+    # sista utväg: bara ett heltal
+    m_int = re.search(r'\d+', s_clean) 
+    if m_int:
+        return float(m_int.group(0))
+
+    return np.nan
+
+def fix_floor(s): # tar in en sträng gällande våning
+    """
+    Tolkar våning från sträng.
+    - 'vån 3' -> 3.0
+    - 'vån 2,5' -> 2.5
+    - 'BV' / 'bottenvåning' / 'markplan' -> 0.0
+    - konstiga värden ('826 m² tomt') -> NaN
+    """
+    if s is None: 
+        return np.nan
+    s = s.strip()
+    low = s.lower()
+    # Bottenvåning
+    if 'bottenvåning' in low or 'markplan' in low or 'bv' in low: # synonymer för plan 0
+        return 0.0
+    # uppenbart nonsens
+    if 'tomt' in low: 
+        return np.nan
+
+    # 'vån 3', 'vån 2,5', etc.
+    m = re.search(r'(\d+,\d+|\d+\.\d+|\d+)', s) # ta s och kolla om x antal ints, följt av komma och y antal ints osv.
+    if m:
+        val_str = m.group(1).replace(',', '.') # ersätt komma med punkt
+        try:
+            return float(val_str)
+        except ValueError:
+            pass
+
+    # försök med samma logik som för area/rum
+    return fix_frac(s)
+
+# Huvudfunktionen 
+
+def extract_announcements(page):
+    """
+    Extract all announcements from a single page (the entire page is supplied as a string)
+    Returns the announcements as a Pandas dataframe.
+    The dataframe shall have one row per announcement in the HTML page and the following columns:
+    - address (str)
+    - date (datetime64)
+    - district (str)
+    - municipality (str)
+    - price (int)
+    - area (float)
+    - rooms (float)
+    - floor (float)
+
+    Parameters:
+    page -- content of the HTML page as a string
+    """
+    soup = BeautifulSoup(page, features='html.parser') # här gör du om html strängen page till ett html träd
+    
+    rows = [] # varje element i rows kommer blir en dicitonary för en annons
+
+    # varje annons ligger i en div.property-card 
+    for card in soup.select("div.property-card"): # hittar alla <div class="property-card"> i HTML:en, det vill säga annonser
+        data = {
+            "address": None, # sträng fält
+            "date": None,
+            "district": None,
+            "municipality": None,
+            "price": np.nan, # numeriska fält
+            "area": np.nan,
+            "rooms": np.nan,
+            "floor": np.nan,
+        }
+
+        # Adress
+        title = card.select_one("h3.property-title") # Letar efter ett <h3 class="property-title"> inuti just den här annonsen (card)
+        if title is not None: 
+            data["address"] = title.get_text(strip=True) # lägger in title på "address" och tar bort extra mellanslag
+
+        # Alla <p> under property-details innehåller (label, värde)
+        for p in card.select("div.property-details > p"): # Hittar alla <p>-taggar direkt under <div class="property-details"> i det här kortet.
+            parts = list(p.stripped_strings) # delar upp alla gällande ett visst card i en lista
+            if not parts:
+                continue
+
+            label = parts[0].strip().rstrip(":").lower() # finputsa första textbiten i cardet, label blir nyckeln du matchar på
+            value = " ".join(parts[1:]).strip() # value som tillhör myckeln, tar resten att textbiten för cardet
+            low_val = value.lower() 
+
+            if label == "datum": # om nyckeln är datum 
+                data["date"] = fix_date(value) # gör till date
+
+            elif label == "område": # om det blir område, ex: "Lägenhet · Kortedala · Göteborg"
+                parts2 = [x.strip() for x in value.split("·")] # ta bort onödiga mellanslag och punkter
+                if len(parts2) >= 3: # om längden är som i exemplet
+                    data["district"] = parts2[-2] # näst sista
+                    data["municipality"] = parts2[-1] # sista
+                elif len(parts2) == 2: # om den är två
+                    data["district"] = parts2[0]
+                    data["municipality"] = parts2[1]
+
+            elif label == "pris":
+                # plocka bara siffror ur "1 400 000 kr"
+                digits = re.sub(r"\D", "", value) # /D ickesiffra, ersätts med "" (tom string)
+                if digits:
+                    data["price"] = int(digits)
+
+            elif label == "storlek": # storlek ska vara i m^2 – om inte, behandla som saknad
+                if "m²" not in low_val:
+                    data["area"] = np.nan
+                else:
+                    data["area"] = fix_frac(value) 
+
+            elif label == "rum": # ibland ligger "39 200 kr/m²" eller "vån 1" felaktigt under rum
+                if any(sub in low_val for sub in ["kr/m", "vån", "tomt"]): # då är det något skumt, fel enhet
+                    data["rooms"] = np.nan
+                else:
+                    data["rooms"] = fix_frac(value)
+
+            elif label == "våning":
+                data["floor"] = fix_floor(value)
+
+        rows.append(data) # till slut, lägg till rows i data
+
+    # Bygg DataFrame i rätt kolumnordning
+    df = pd.DataFrame(  
+        rows,
+        columns=["address", "date", "district", "municipality", # ge namn till kolumnerna
+                 "price", "area", "rooms", "floor"]
+    )
+
+    # Se till att date blir datetime64
+    df["date"] = pd.to_datetime(df["date"]) # fixa dates
+
+    return df
+
+# testing
+
+test_html = """
+<div class="property-card">
+  <h3 class="property-title">Danska Vägen 12A</h3>
+  <div class="property-details">
+    <p><strong>Datum:</strong> 29 december 2014</p>
+    <p><strong>Område:</strong> Lägenhet · Kortedala · Göteborg</p>
+    <p><strong>Pris:</strong> 1 450 000 kr</p>
+    <p><strong>Storlek:</strong> 64½ m²</p>
+    <p><strong>Rum:</strong> 2½ rum</p>
+    <p><strong>Våning:</strong> vån 3</p>
+  </div>
+</div>
+"""
+
+df_test = extract_announcements(test_html)
+print(df_test)
