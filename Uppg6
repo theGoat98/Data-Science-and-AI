@@ -1,0 +1,26 @@
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from matplotlib.patches import Patch
+import numpy as np
+
+prices_msek = df_2023_gothenburg["price"]/ 1_000_000 
+apt_area = df_2023_gothenburg["area"]
+nr_rooms = df_2023_gothenburg["rooms"]
+
+colors = cm.rainbow(np.linspace(0, 1, len(nr_rooms.unique())))
+legend_map = dict(zip(sorted(nr_rooms.unique()), colors))
+        
+fig, ax = plt.subplots(figsize=(8, 5)) 
+
+point_colors = nr_rooms.map(legend_map)
+plt.scatter(apt_area, prices_msek, c = point_colors)
+handles = [Patch(color=legend_map[r], label=f"{r} rooms") for r in sorted(legend_map.keys())]
+ax.legend(handles=handles, title="Rooms")
+
+
+ax.set_xlabel("Area") 
+ax.set_ylabel("Price (MSEK)") 
+ax.set_title("Scatterplot of relationship between apartment area and price") 
+
+fig.tight_layout() 
+plt.show() 
