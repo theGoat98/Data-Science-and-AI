@@ -1,0 +1,98 @@
+#uppg 6
+# Codegrade Tag Question6
+# Do *not* remove the tag above
+# Write your code below
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from matplotlib.patches import Patch
+import numpy as np
+
+df_clean = df_2023_gothenburg.dropna(subset=["area", "price", "rooms"])
+
+prices_msek = df_clean["price"] / 1_000_000
+apt_area = df_clean["area"]
+nr_rooms = df_clean["rooms"]
+
+colors = cm.rainbow(np.linspace(0, 1, len(nr_rooms.unique())))
+legend_map = dict(zip(sorted(nr_rooms.unique()), colors))
+        
+fig, ax = plt.subplots(figsize=(8, 5)) 
+
+point_colors = nr_rooms.map(legend_map)
+plt.scatter(apt_area, prices_msek, c = point_colors)
+handles = [Patch(color=legend_map[r], label=r) for r in sorted(legend_map.keys())]
+ax.legend(handles=handles, title="Rooms")
+
+
+ax.set_xlabel("Area") 
+ax.set_ylabel("Price (MSEK)") 
+ax.set_title("Scatterplot of relationship between apartment area and price") 
+
+fig.tight_layout() 
+plt.show() 
+
+#uppg 7
+# Codegrade Tag Question7
+# Do *not* remove the tag above
+# Write your code below
+df_2023_gothenburg_w_psqm = df_2023_gothenburg.copy()
+df_2023_gothenburg_w_psqm["price per sqm"] = (df_2023_gothenburg_w_psqm["price"])/(df_2023_gothenburg_w_psqm["area"]) 
+print(df_2023_gothenburg_w_psqm.shape)
+print(df_2023_gothenburg_w_psqm.columns.tolist())
+print('\n'.join(map(lambda v: f'{v:0.0f}', 
+                    df_2023_gothenburg_w_psqm.iloc[[4363, 1199, 5524, 5017, 1442, 4520, 5670, 1053, 1729, 5529]] \
+                    ['price per sqm'].tolist())))
+
+print(df_2023_gothenburg_w_psqm)
+
+#uppg8
+# Codegrade Tag Question8
+# Do *not* remove the tag above
+# Write your code below
+import matplotlib.pyplot as plt
+
+Price_per_sqm = df_2023_gothenburg_w_psqm["price per sqm"].dropna()
+
+average_price = df_2023_gothenburg_w_psqm.groupby("rooms", group_keys=True)[['price per sqm']].mean()
+
+fig, ax = plt.subplots(figsize=(8, 5))
+plt.bar(average_price.index.astype(str), average_price['price per sqm'], edgecolor='black')
+
+ax.set_xlabel("Number of rooms") 
+ax.set_ylabel("Average price per sqm") 
+ax.set_title("Bar chart of average price per sqm by number of rooms") 
+
+fig.tight_layout() 
+plt.show() 
+
+#uppg9
+# Codegrade Tag Question9
+# Do *not* remove the tag above
+# Write your code below
+import pandas as pd 
+import matplotlib.pyplot as plt
+Price_per_sqm = df_2023_gothenburg_w_psqm["price per sqm"].dropna()
+average_price = df_2023_gothenburg_w_psqm.groupby("district", group_keys=True)[['price per sqm']].mean()
+
+cheapest = average_price.nsmallest(5, 'price per sqm')
+cheapest = pd.Series(cheapest['price per sqm'], index=cheapest.index)
+most_expensive = average_price.nlargest(5, 'price per sqm')
+
+print(most_expensive)
+most_expensive = most_expensive.sort_values(by='price per sqm')
+most_expensive = pd.Series(most_expensive['price per sqm'], index=most_expensive.index)
+
+
+fig, ax = plt.subplots(figsize=(8, 5))
+plt.bar(cheapest.index.astype(str), cheapest, edgecolor='black', label='Cheapest')
+plt.bar(most_expensive.index.astype(str), most_expensive, edgecolor='black', label='Most Expensive')
+ax.legend()
+plt.xticks(rotation=45)
+
+
+ax.set_xlabel("District") 
+ax.set_ylabel("Average price per sqm") 
+ax.set_title("Bar chart of average price per sqm by district") 
+
+fig.tight_layout() 
+plt.show() 
