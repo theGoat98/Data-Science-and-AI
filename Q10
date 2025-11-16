@@ -1,0 +1,12 @@
+"""
+
+Based on the findings above, it is clear that the biggest factor that influences the price per square meter in Gothenburg apartments is the district in which the apartment is located. 
+The districts with the highest average price per square meter are more desirable areas, possibly due to better amenities, location, lower crime rates, or overall living conditions. 
+Conversely, the districts with the lowest average price per square meter may be less sought after for similar reasons. The average price per square meter varies significantly between districts,
+indicating that location plays a crucial role in determining apartment prices in Gothenburg.
+
+At the same time, the number of rooms seem to have a less pronounced effect on the price per square meter, as the average prices across different room counts are relatively closer together compared to the variation seen across districts.
+This indicates that while the size and layout of an apartment (as indicated by the number of rooms) do impact the price, the location (district) is a more dominant factor in determining the price per square meter.
+
+
+"""
