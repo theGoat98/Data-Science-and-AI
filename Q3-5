@@ -1,28 +1,20 @@
 # Q3
+# Codegrade Tag Question3
+# Do *not* remove the tag above
+# Write your code below
 
 pages_by_year = extract_files("gothenburg_sold_apartments.zip") # Hämta alla HTML-sidor (en per år) från zip-filen
 page_2023 = pages_by_year[2023] # Plocka ut sidan för året 2023
 df_2023 = extract_announcements(page_2023) # Gör om HTML-sidan till en DataFrame med våra announcements
-df_2023_gothenburg = df_2023[df_2023["municipality"] == "Göteborg"].reset_index(drop=True) # Filtrera så vi bara behåller de annonser där kommunen är Göteborg
-
-print(df_2023_gothenburg)
+df_2023_gothenburg = df_2023[df_2023["municipality"] == "Göteborg"] # Filtrera så vi bara behåller de annonser där kommunen är Göteborg
 
 
 #Q4
+# Codegrade Tag Question4
+# Do *not* remove the tag above
+# Implement the function five_point_summary below, and compute the summary for df_2023_gothenburg
 
 def five_point_summary(s):
-    """
-    Computes the five-point summary of the series s.
-    Returns a new Series with index:
-    - min
-    - Q1
-    - median
-    - Q3
-    - max
-
-    Parameters:
-    s -- The series to compute the summary for
-    """
     s_clean = s.dropna() # Ta bort NaN så att de inte stör beräkningarna
     return pd.Series(
         [
@@ -38,8 +30,10 @@ def five_point_summary(s):
 price_2023_gothenburg_fps = five_point_summary(df_2023_gothenburg["price"])
 print(price_2023_gothenburg_fps)
 
-
 # Q5
+# Codegrade Tag Question5
+# Do *not* remove the tag above
+# Write your code below
 
 import matplotlib.pyplot as plt
 
@@ -47,20 +41,27 @@ prices_msek = df_2023_gothenburg["price"].dropna() / 1_000_000 # Plocka ut pris 
 
 n = len(prices_msek) 
 bin_count = int(np.ceil(np.log2(n) + 1)) # Sturges' rule: k = ceil(log2(n) + 1)
+
+min_bin = prices_msek.min()
+max_bin = prices_msek.max()
+
+bin_edges = np.linspace(min_bin, max_bin, bin_count + 1)
+#bin_edges = np.linspace(min_bin, max_bin, bin_count+1)
+
 fig, ax = plt.subplots(figsize=(8, 5)) # skapa figur, axis och bestäm dess storlek
 
 counts, bins, _ = ax.hist( # Rita histogram via ax.hist och spara counts och bins
     prices_msek, # data till histogrammet
-    bins=bin_count, # från Sturges
+    bins=bin_edges, # från Sturges
     edgecolor="black", 
     linewidth=0.7
 )
-#Sätt axel-etiketter och titel
+
 ax.set_xlabel("Price (MSEK)") # x-etiketter 
 ax.set_ylabel("Frequency") # y-etiketter
 ax.set_title("Histogram of Apartment Prices in Gothenburg 2023") # ger titel
 
-xticks = np.arange(0.0, 20.0 + 2.5, 2.5) # X-ticks i MSEK: 0.0, 2.5, 5.0, ..., 20.0 (exakt en decimal)
+xticks = np.arange(0.0, 20.0 +2.5, 2.5) # X-ticks i MSEK: 0.0, 2.5, 5.0, ..., 20.0 (exakt en decimal)
 ax.set_xticks(xticks) # lägg på figur
 ax.set_xticklabels([f"{x:.1f}" for x in xticks]) # format alltid en decimal
 
