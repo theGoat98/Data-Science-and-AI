@@ -8,8 +8,6 @@ import numpy as np
 import re
 from datetime import date
 
-# Hjälpfunktioner
-# Svenska månadsnamn -> månadstal
 month_dict = { # skapar en dictionary
     'januari': 1, 'februari': 2, 'mars': 3, 'april': 4,
     'maj': 5, 'juni': 6, 'juli': 7, 'augusti': 8,
@@ -17,7 +15,6 @@ month_dict = { # skapar en dictionary
 }
 
 def fix_date(s): # tar in en datum (string)
-    """Ex: '29 december 2014' -> datetime.date"""
     s = s.strip() # tar bort mellanslag i början eller slutet av strängen
     parts = s.split() # delar upp strängen i en lista av ord
     if len(parts) < 3:
@@ -29,22 +26,18 @@ def fix_date(s): # tar in en datum (string)
     return date(year, month, day) # returnerar datumet som date
 
 def fix_frac(s): # tar in s (string som är ett tal)
-    """
-    Hanterar tal som '68 m²', '64½ m²', '1½ rum', '2,5' osv.
-    Returnerar float eller NaN.
-    """
     if s is None:
         return np.nan # skyddar mot att funktionen kraschar
     low = s.lower() # gör stringen till små bokstäver
-    # tomt-uppgifter ska ignoreras
+
     if 'tomt' in low:
         return np.nan # alltså om det blir tomtinformation istället för lägenhetsinformation
 
     s_clean = re.sub(r'\b(m²|m2|m\^2|rum)\b', '', s, flags=re.IGNORECASE).strip() # ta bort enheter och ersätt med mellanslag
     s_clean = s_clean.replace(',', '.') # ersätt komma med punkt
     frac_map = {'½': 0.5, '¼': 0.25, '¾': 0.75} # unicode-bråk dicationary
-    # om vi har ett "vanligt" decimaltal, använd det
-    m_dec = re.search(r'\d+\.\d+', s_clean) # en elelr flera siffror . en eller flera siffror
+    
+    m_dec = re.search(r'\d+\.\d+', s_clean) # en eller flera siffror.
     if m_dec:
         try:
             return float(m_dec.group(0)) # testa returnera direkt
@@ -65,13 +58,6 @@ def fix_frac(s): # tar in s (string som är ett tal)
     return np.nan
 
 def fix_floor(s): # tar in en sträng gällande våning
-    """
-    Tolkar våning från sträng.
-    - 'vån 3' -> 3.0
-    - 'vån 2,5' -> 2.5
-    - 'BV' / 'bottenvåning' / 'markplan' -> 0.0
-    - konstiga värden ('826 m² tomt') -> NaN
-    """
     if s is None: 
         return np.nan
     s = s.strip()
@@ -82,6 +68,13 @@ def fix_floor(s): # tar in en sträng gällande våning
     # uppenbart nonsens
     if 'tomt' in low: 
         return np.nan
+    
+    if "-1" in s or "källar" in low: # källarvåning
+        return -1.0
+    
+    if "-2" in s: # källarvåning
+        return -2.0
+
 
     # 'vån 3', 'vån 2,5', etc.
     m = re.search(r'(\d+,\d+|\d+\.\d+|\d+)', s) # ta s och kolla om x antal ints, följt av komma och y antal ints osv.
@@ -98,22 +91,6 @@ def fix_floor(s): # tar in en sträng gällande våning
 # Huvudfunktionen 
 
 def extract_announcements(page):
-    """
-    Extract all announcements from a single page (the entire page is supplied as a string)
-    Returns the announcements as a Pandas dataframe.
-    The dataframe shall have one row per announcement in the HTML page and the following columns:
-    - address (str)
-    - date (datetime64)
-    - district (str)
-    - municipality (str)
-    - price (int)
-    - area (float)
-    - rooms (float)
-    - floor (float)
-
-    Parameters:
-    page -- content of the HTML page as a string
-    """
     soup = BeautifulSoup(page, features='html.parser') # här gör du om html strängen page till ett html träd
     
     rows = [] # varje element i rows kommer blir en dicitonary för en annons
@@ -196,7 +173,3 @@ def extract_announcements(page):
     df["date"] = pd.to_datetime(df["date"]) # fixa dates
 
     return df
-"""
-
-df_test = extract_announcements(test_html)
-print(df_test)
