@@ -1,0 +1,21 @@
+# Codegrade Tag Question1
+# Do *not* remove the tag above
+import numpy as np
+import pandas as pd
+df = pd.read_csv("diabetes_binary_5050split_health_indicators_BRFSS2015.csv")
+print(df.head())
+binary_target = df['Diabetes_binary']
+binary_features = [] 
+
+for i in df.columns:
+    if i == 'Diabetes_binary':
+        continue
+    if df[i][0]== 0 or df[i][0] == 1:
+        binary_features.append(i)
+
+y = np.array(binary_target.values)
+x = np.array(df[binary_features].values)
+
+#print(binary_target.value_counts())
+print(binary_target)
+print(y)
