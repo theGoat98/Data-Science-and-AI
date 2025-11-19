@@ -1,0 +1,62 @@
+#Q1
+# Codegrade Tag Question1
+# Do *not* remove the tag above
+import numpy as np
+import pandas as pd
+df = pd.read_csv("diabetes_binary_5050split_health_indicators_BRFSS2015.csv")
+
+binary_target = 'Diabetes_binary'
+binary_features = [] 
+
+for i in df.columns:
+    if i == 'Diabetes_binary':
+        continue
+    if df[i][0]== 0 or df[i][0] == 1:
+        binary_features.append(i)
+
+y = np.array(df[binary_target].values)
+X = np.array(df[binary_features].values)
+#print(binary_target)
+
+#Q2
+# Codegrade Tag Question2
+# Do *not* remove the tag above
+
+def train_test_split_manual(X, y, train_size = 0.75,  random_state = None):
+    assert X.ndim == 2 and y.ndim == 1 and X.shape[0] == y.shape[0]
+    rng = np.random.default_rng()
+    n = y.size
+    train_n = int(n * train_size)
+
+    x_train = np.zeros((train_n,14))
+    x_test = np.zeros((n-train_n,14))
+
+    y_train = np.array([])
+    y_test = np.array([])          
+    
+    mixed_x = X.copy()
+    mixed_y = y.copy()
+    rng.shuffle(mixed_x)
+    rng.shuffle(mixed_y)
+   
+    for i in range(n):
+        if i <  train_n:
+            x_train[i] = mixed_x[i]
+            y_train = np.append(y_train, mixed_y[i])    
+        else:
+            x_train[n-i] = mixed_x[n-i]
+            y_test = np.append(y_test, mixed_y[i])
+    
+    """
+    Splits the arrays X and y into random train and test subsets.
+
+    Parameters:
+    - X : the n*d matrix of observations
+    - y : the n-vector of class labels
+    - train_size : the fraction of rows to use for training
+    - random_state : a random seed, or None for unpredictable random initialization
+    """
+    return x_train, x_test, y_train, y_test
+#print(x,y)
+#train_test_split_manual(x, y)
+X_train, X_test, y_train, y_test = train_test_split_manual(x, y)
