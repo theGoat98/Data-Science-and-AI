@@ -1,0 +1,110 @@
+# Codegrade Tag Question3
+# Do *not* remove the tag above
+import numpy as np
+
+class NaiveBinaryBayes:
+    """
+    Naive Bayes classifier for binary features and binary class labels.
+
+    Matches the interface of sklearn.naive_bayes.CategoricalNB
+    """
+    
+    def __init__(self, alpha = 1.0):
+        alpha = float(alpha)
+        self.alpha = alpha
+        """
+        Construct the classifier object.
+
+        Parameters:
+        - alpha : Parameter for Laplace smoothing (how many pseudoinstances to add for each category)
+        """
+        pass
+    
+
+    
+    def fit(self,X,y):
+        n_features_in_ = X.shape[1]
+        classes_ = np.unique(y)
+        class_count_ = np.array([np.sum(y == c) for c in classes_])
+        class_log_prior_ = np.log(class_count_ / y.size)
+        category_count_ = []
+        feature_log_prob_ = []
+        for feature_index in range(n_features_in_):
+            feature_values = X[:, feature_index]
+            category_count = np.zeros((2, 2))  # 2 classes, 2 feature values (0 and 1)
+            for class_index, class_label in enumerate(classes_):
+                for feature_value in [0, 1]:
+                    count = np.sum((y == class_label) & (feature_values == feature_value))
+                    category_count[class_index, feature_value] = count + self.alpha  # Laplace smoothing
+            category_count_.append(category_count)
+            feature_log_prob = np.log(category_count / class_count_[:, np.newaxis])
+            feature_log_prob_.append(feature_log_prob)
+        self.n_features_in_ = n_features_in_
+        self.classes_ = classes_
+        self.class_count_ = class_count_
+        self.class_log_prior_ = class_log_prior_    
+
+        """
+        Fit the dataset X with correct class labels y into the classfier.
+
+        Defines the following member variables:
+        - n_feature_in : integer, the number of features d
+        - classes_ : array, class labels
+        - class_count_ : array, count of classes encountered during training
+        - class_log_prior_ : logarithm of empirical prior (ln (class count / n) for each class)
+        - category_count_: a list of length d, one array per feature; each array is of shape 2*2 and the element at index (j,k) in the ith array corresponds to the number of observations coming from class j that have value k for the ith feature 
+        - feature_log_prob_: a list of length d, one array per feature; the element corresponds to the log of matching category count divided by the class count
+
+        Parameters:
+        - X : n observations (rows) of d features (columns), all must be binary
+        - y : n class labels (binary)
+
+        Return value:
+        - Returns self
+        """
+        assert X.ndim == 2 and y.ndim == 1 and X.shape[0] == y.shape[0]
+        return self
+        
+
+    
+    def predict_log_proba(self, X):
+        """
+        Given an m*d array X, returns an m*2 array of log probabilities corresponding to the posterior probability of the observation coming from a given class
+
+        Parameters:
+        - X: an m*d array of observations to predict
+
+        Return value:
+        - An m*2 array of log probabilities
+        """
+        assert X.ndim == 2 and X.shape[1] == self.n_features_in_
+        raise NotImplementedError
+
+    
+    def predict_proba(self, X):
+        """
+        Given an m*d array X, returns an m*2 array of probabilities corresponding to the posterior probability of the observation coming from a given class
+
+        Parameters:
+        - X: an m*d array of observations to predict
+
+        Return value:
+        - An m*2 array of probabilities
+        """
+        assert X.ndim == 2 and X.shape[1] == self.n_features_in_
+        raise NotImplementedError
+
+    
+    
+    def predict(self, X):
+        """
+        Given an m*d array X, returns an m vector of predicted class labels
+
+        Parameters:
+        - X: an m*d array of observations to predict
+
+        Return value:
+        - An m array of class labels (corresponding to the maximum probability for each observation)
+        """
+        assert X.ndim == 2 and X.shape[1] == self.n_features_in_
+        raise NotImplementedError
