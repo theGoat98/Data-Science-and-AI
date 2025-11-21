@@ -34,10 +34,9 @@ def train_test_split_manual(X, y, train_size = 0.75,  random_state = None):
     y_train = np.array([])
     y_test = np.array([])  
     
-    mixed_x = X.copy()
-    mixed_y = y.copy()
-    rng.shuffle(mixed_x)
-    rng.shuffle(mixed_y)
+    idx = rng.permutation(n)
+    mixed_x = X[idx]
+    mixed_y = y[idx]
    
     count = 0
     for i in range(n):
@@ -57,4 +56,4 @@ def train_test_split_manual(X, y, train_size = 0.75,  random_state = None):
     
     return x_train, x_test, y_train, y_test
 
-X_train, X_test, y_train, y_test = train_test_split_manual(X, y)_test = train_test_split_manual(x, y)
+X_train, X_test, y_train, y_test = train_test_split_manual(X, y)
