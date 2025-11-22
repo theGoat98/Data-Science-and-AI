@@ -1,0 +1,64 @@
+#Q9
+"""
+The classificaton metrics implemented above show that our custom Naive Binary Bayes classifier performs comparably to the sklearn implementation. 
+The accuracy, precision, recall, and F1-score are all within a similar range, indicating that our model is effective for this binary classification task. 
+Any minor differences in the metrics could be attributed to implementation details or numerical precision, but overall, the results suggest that our Naive Binary Bayes 
+classifier is a valid and reliable approach for predicting diabetes based on the provided health indicators.
+
+We get an accuracy of around 0.75, which indicates that the model is performing better than random guessing. The other three metrics (precision, recall, and F1-score) also show reasonable performance, 
+suggesting that the model is effectively capturing patterns in the data. So overall the model predicts better than a monkey classifier.   
+
+Choosing another alpha does not make a significant difference in the results, which could imply that the model's performance is not highly sensitive to this hyperparameter in this specific dataset.
+"""
+
+# Codegrade Tag Question10
+# Do *not* remove the tag above
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import CategoricalNB
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import numpy as np
+import pandas as pd
+df = pd.read_csv("diabetes_binary_5050split_health_indicators_BRFSS2015.csv")
+
+binary_target = 'Diabetes_binary'
+binary_features = [] 
+
+for i in df.columns:
+    if i == 'Diabetes_binary':
+        continue
+
+    binary_features.append(i)
+
+y = np.array(df[binary_target].values)
+X = np.array(df[binary_features].values)
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.75, random_state=16445)
+nbb = CategoricalNB(alpha = 1).fit(X_train,y_train)
+y_pred = nbb.predict(X_test)
+lp_pred = nbb.predict_log_proba(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+fscore = f1_score(y_test, y_pred)
+
+# Codegrade Tag Question11
+# Do *not* remove the tag above
+import sklearn.metrics
+import numpy as np
+import matplotlib.pyplot as plt
+fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test, lp_pred[:,1], pos_label=1)
+auc = np.trapz(tpr, fpr) 
+fig, ax = plt.subplots(figsize=(8, 5))
+
+
+plt.plot(fpr, tpr, label='AUC = {:.3f}'.format(auc))
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Area Under the Curve (AUC) for Naive Bayes Classifier (0.816)')
+plt.legend(loc="lower right")
+plt.show()
