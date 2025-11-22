@@ -1,0 +1,224 @@
+# Codegrade Tag Question3
+# Do *not* remove the tag above
+
+import numpy as np
+
+class NaiveBinaryBayes: # defines new class
+    
+    def __init__(self, alpha = 1.0): # constructor, run when new object is created, alpha for laplace smoothing
+        alpha = float(alpha)
+        self.alpha = alpha
+        pass
+    
+
+    
+    def fit(self,X,y):
+        n_features_in_ = X.shape[1] # d features
+        classes_ = np.unique(y) # 0 or 1 -> (0, 1)
+        class_count_ = np.array([np.sum(y == c) for c in classes_]) # number or 0's and 1's
+        class_log_prior_ = np.log(class_count_ / y.size) # 2-dim 
+        category_count_ = [] 
+        feature_log_prob_ = []
+
+        m = 2  # antal möjliga feature-värden (0 och 1) -> används i Laplace-smoothing
+
+        for feature_index in range(n_features_in_): # 0 to n feat
+            feature_values = X[:, feature_index] # all obs for feat i
+            category_count = np.zeros((2, 2))  # 2 classes, 2 feature values (0 and 1)
+            for class_index, class_label in enumerate(classes_): 
+                for feature_value in [0, 1]: 
+                    count = np.sum((y == class_label) & (feature_values == feature_value)) # hur många av varje
+                    # N_{jk} + alpha
+                    category_count[class_index, feature_value] = count + self.alpha # undvik 0 sannolikhet med Laplace smoothing
+
+            category_count_.append(category_count) # lägg till matrisen i arrayen
+
+            feature_log_prob = np.log( # Laplace-smoothing i nämnaren: N_j + m * alpha
+                category_count / (class_count_[:, np.newaxis] + m * self.alpha) 
+            )
+            feature_log_prob_.append(feature_log_prob) 
+
+        self.n_features_in_ = n_features_in_
+        self.classes_ = classes_
+        self.class_count_ = class_count_
+        self.class_log_prior_ = class_log_prior_
+        self.category_count_ = category_count_
+        self.feature_log_prob_ = feature_log_prob_
+
+        return self
+        
+
+    
+    def predict_log_proba(self, X):
+        X = np.asarray(X)
+        assert X.ndim == 2 and X.shape[1] == self.n_features_in_
+    
+        log_proba = np.zeros((X.shape[0], 2))  # 2 klasser
+
+        for i in range(X.shape[0]):  # för varje observation
+            log_probs = self.class_log_prior_.copy()  # starta med log-prior
+            for feature_index in range(self.n_features_in_):
+                feature_value = X[i, feature_index]  # 0 eller 1
+                log_probs += self.feature_log_prob_[feature_index][:, feature_value]
+
+            # *** NYTT: normalisera till log-posterior ***
+            max_log = np.max(log_probs)
+            log_probs = log_probs - (max_log + np.log(np.sum(np.exp(log_probs - max_log))))
+
+            log_proba[i] = log_probs
+
+        return log_proba
+
+    
+    def predict_proba(self, X):
+        predict_proba = np.zeros((X.shape[0], 2))  # 2 classes
+        log_probs = self.predict_log_proba(X)
+        for i in range(X.shape[0]):
+            max_log_prob = np.max(log_probs[i])
+            probs = np.exp(log_probs[i] - max_log_prob)
+            probs /= np.sum(probs)
+            predict_proba[i] = probs
+        return predict_proba
+        """
+        Given an m*d array X, returns an m*2 array of probabilities corresponding to the posterior probability of the observation coming from a given class
+
+        Parameters:
+        - X: an m*d array of observations to predict
+
+        Return value:
+        - An m*2 array of probabilities
+        """
+        assert X.ndim == 2 and X.shape[1] == self.n_features_in_
+        raise NotImplementedError
+
+    
+    
+    def predict(self, X):
+        predict = np.zeros(X.shape[0], dtype=int)
+        probs = self.predict_proba(X)
+        for i in range(X.shape[0]):
+            predict[i] = np.argmax(probs[i])
+        return predict
+        """
+        Given an m*d array X, returns an m vector of predicted class labels
+
+        Parameters:
+        - X: an m*d array of observations to predict
+
+        Return value:
+        - An m array of class labels (corresponding to the maximum probability for each observation)
+        """
+        assert X.ndim == 2 and X.shape[1] == self.n_features_in_
+        raise NotImplementedError
+
+
+# Codegrade Tag Question7
+# Do *not* remove the tag above
+
+import numpy as np
+
+def confusion_matrix_manual(y_true, y_pred):
+    """
+    Computes a confusion matrix for binary classification predictions.
+
+    Parameters:
+    - y_true: vector, ground truth labels (0 or 1)
+    - y_pred: vector, predicted labels (0 or 1)
+
+    Return value:
+    - A 2*2 numpy array C, where C[i, j] is the number of instances
+      with true class i that were predicted as class j.
+    """
+    y_true = np.asarray(y_true)
+    y_pred = np.asarray(y_pred)
+
+    C = np.zeros((2, 2), dtype=int)
+
+    for t, p in zip(y_true, y_pred):
+        C[int(t), int(p)] += 1
+
+    return C
+
+# Codegrade Tag Question8
+# Do *not* remove the tag above
+
+import numpy as np
+
+def accuracy_score_manual(confusion_matrix):
+    """
+    Given confusion matrix, computes the accuracy
+
+    Parameters:
+    - confusion_matrix: a 2*2 matrix
+
+    Return value:
+    - floating point, accuracy (fraction of correct classifications)
+    """
+    cm = np.asarray(confusion_matrix)
+    TN = cm[0, 0]
+    FP = cm[0, 1]
+    FN = cm[1, 0]
+    TP = cm[1, 1]
+    total = TN + FP + FN + TP
+    if total == 0:
+        return 0.0
+    return (TP + TN) / total
+
+
+def precision_score_manual(confusion_matrix):
+    """
+    Given confusion matrix, computes the precision
+
+    Parameters:
+    - confusion_matrix: a 2*2 matrix
+
+    Return value:
+    - floating point, precision (fraction of relevant entries among positive classifications)
+    """
+    cm = np.asarray(confusion_matrix)
+    TN = cm[0, 0]
+    FP = cm[0, 1]
+    FN = cm[1, 0]
+    TP = cm[1, 1]
+    denom = TP + FP  # alla predicerade positiva
+    if denom == 0:
+        return 0.0
+    return TP / denom
+
+
+def recall_score_manual(confusion_matrix):
+    """
+    Given confusion matrix, computes the recall
+
+    Parameters:
+    - confusion_matrix: a 2*2 matrix
+
+    Return value:
+    - floating point, recall (fraction of relevant entries returned)
+    """
+    cm = np.asarray(confusion_matrix)
+    TN = cm[0, 0]
+    FP = cm[0, 1]
+    FN = cm[1, 0]
+    TP = cm[1, 1]
+    denom = TP + FN  # alla verkligt positiva
+    if denom == 0:
+        return 0.0
+    return TP / denom
+
+
+def f1_score_manual(confusion_matrix):
+    """
+    Given confusion matrix, computes the F-score
+
+    Parameters:
+    - confusion_matrix: a 2*2 matrix
+
+    Return value:
+    - floating point, F-score (harmonic mean of precision and recall)
+    """
+    precision = precision_score_manual(confusion_matrix)
+    recall = recall_score_manual(confusion_matrix)
+    if precision + recall == 0.0:
+        return 0.0
+    return 2 * precision * recall / (precision + recall)
