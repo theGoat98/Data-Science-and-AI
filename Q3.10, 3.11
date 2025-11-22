@@ -1,0 +1,31 @@
+# Codegrade Tag Question10
+# Do *not* remove the tag above
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import CategoricalNB
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import numpy as np
+import pandas as pd
+df = pd.read_csv("diabetes_binary_5050split_health_indicators_BRFSS2015.csv")
+
+binary_target = 'Diabetes_binary'
+binary_features = [] 
+
+for i in df.columns:
+    if i == 'Diabetes_binary':
+        continue
+
+    binary_features.append(i)
+
+y = np.array(df[binary_target].values)
+X = np.array(df[binary_features].values)
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.75, random_state=16445)
+nbb = CategoricalNB(alpha = 1).fit(X_train,y_train)
+y_pred = nbb.predict(X_test)
+lp_pred = nbb.predict_log_proba(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+fscore = f1_score(y_test, y_pred)
