@@ -132,3 +132,60 @@ ax.legend(title="Class", loc="best")
 plt.show()
 
 #Because it shows a strong correlation between Length and width. For these two charachteristics, there is also a pretty distinct difference between the classes. 
+
+# Codegrade Tag Question3b
+# Do *not* remove the tag above
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+pca_components = pca.components_
+pca_explained_variance = np.sum(pca.explained_variance_ratio_)
+
+#print("Explained variance by first two components:", pca_explained_variance)
+fig, ax_pca = plt.subplots(figsize=(8,6))
+
+classes = np.unique(y)
+for cls in classes:
+    mask = (y == cls)
+    ax_pca.scatter(
+        X_pca[mask, 0],
+        X_pca[mask, 1],
+        label=f"class {cls}"
+    )
+
+ax_pca.set_xlabel("PC1", fontsize=12)
+ax_pca.set_ylabel("PC2", fontsize=12)
+ax_pca.set_title("PCA projection of the dataset", fontsize=14)
+ax_pca.legend(title="Class", loc="best")
+
+plt.show()
+
+# Codegrade Tag Question3c
+# Do *not* remove the tag above
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.random_projection import GaussianRandomProjection
+
+gauss = GaussianRandomProjection(n_components=2, random_state=0)
+X_gauss = gauss.fit_transform(X)
+
+fig, ax_gauss = plt.subplots(figsize=(8,6))
+
+classes = np.unique(y)
+for cls in classes:
+    mask = (y == cls)
+    ax_gauss.scatter(
+        X_gauss[mask, 0],
+        X_gauss[mask, 1],
+        label=f"class {cls}"
+    )
+
+ax_gauss.set_title("Gaussian Random Projection (2D)", fontsize=14)
+ax_gauss.legend(title="Class", loc="best")
+
+plt.show()
