@@ -1,0 +1,134 @@
+#Question 1
+# Codegrade Tag Question1
+# Do *not* remove the tag above
+# Implement the class below
+
+import numpy as np
+
+class KMeansManual:
+    def __init__(self, n_clusters, init = None, random_state = None):
+        assert n_clusters > 0
+        self.n_clusters = n_clusters
+        self.random_state = random_state
+        if init is not None:
+            assert init.ndim == 2
+            assert init.shape[0] == n_clusters
+            self.init = init.copy()
+        else:
+            self.init = None
+
+    def assign_labels(self, X, cluster_centers):
+        assert isinstance(X,np.ndarray)
+        assert isinstance(cluster_centers,np.ndarray)
+        assert X.ndim == 2 and cluster_centers.ndim == 2
+        assert cluster_centers.shape[0] == self.n_clusters
+        assert X.shape[1] == cluster_centers.shape[1]
+        
+        x_values = np.array([])
+        for i in range(self.n_clusters):
+            diff = X - cluster_centers[i]
+            sq_dist = np.sum(diff**2, axis=1)
+            x_values = np.vstack([x_values, sq_dist]) if x_values.size else sq_dist
+        labels = np.argmin(x_values, axis=0)
+        return labels
+
+    def compute_cluster_centers(self, X, labels):
+        assert isinstance(X,np.ndarray)
+        assert isinstance(labels,np.ndarray)
+        assert X.ndim == 2
+        assert labels.ndim == 1
+        assert X.shape[0] == labels.shape[0]
+
+        cluster_centers = np.zeros((self.n_clusters, X.shape[1])) 
+        for i in range(self.n_clusters):
+            cluster_points = X[labels == i]
+            if len(cluster_points) > 0:
+                cluster_centers[i] = np.mean(cluster_points, axis=0)
+            else:
+                cluster_centers[i] = np.zeros(X.shape[1])
+        return cluster_centers
+      
+
+    def compute_inertia(self, X, labels, cluster_centers):
+        assert isinstance(X,np.ndarray)
+        assert isinstance(cluster_centers,np.ndarray)
+        assert isinstance(labels,np.ndarray)
+        assert X.ndim == 2 and cluster_centers.ndim == 2
+        assert labels.ndim == 1
+        assert cluster_centers.shape[0] == self.n_clusters
+        assert X.shape[0] == labels.shape[0]
+        assert X.shape[1] == cluster_centers.shape[1]
+        inertia = 0.0
+        for i in range(X.shape[0]):
+            center = cluster_centers[labels[i]]
+            diff = X[i] - center
+            inertia += np.sum(diff**2)
+        return inertia
+        
+
+    def fit(self,X):
+        labels_ = None
+        cluster_centers_ = None
+        inertia_ = None
+        n_feature_in_ = None
+
+        labels_ = np.zeros(X.shape[0], dtype=int)
+        n_feature_in_ = X.shape[1]  
+        if self.init is not None:
+            cluster_centers_ = self.init.copy()
+        else:
+            if self.random_state is not None:
+                np.random.seed(self.random_state)
+            random_indices = np.random.choice(X.shape[0], self.n_clusters, replace=False)
+            cluster_centers_ = X[random_indices].copy()
+        for _ in range(100):
+            labels_ = self.assign_labels(X, cluster_centers_)
+            new_cluster_centers = self.compute_cluster_centers(X, labels_)
+            if np.all(cluster_centers_ == new_cluster_centers):
+                break
+            cluster_centers_ = new_cluster_centers
+        inertia_ = self.compute_inertia(X, labels_, cluster_centers_)
+        self.labels_ = labels_
+        self.cluster_centers_ = cluster_centers_
+        self.inertia_ = inertia_
+        self.n_feature_in_ = n_feature_in_
+        return self
+
+
+
+#Question 2
+# Codegrade Tag Question2
+# Do *not* remove the tag above
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_table("seeds.tsv", header=None, sep='\t',names=["area","perimeter","compactness","length","width","asymmetry coefficient","length of kernel groove","class"])
+
+y = df['class'].astype(int).values       
+X = df.drop(columns=['class']).values    
+
+scaler = StandardScaler()    
+X = scaler.fit_transform(X)  
+
+#Question 3a
+# Codegrade Tag Question3a
+# Do *not* remove the tag above
+import matplotlib.pyplot as plt
+import numpy as np
+interesting_feature1 = "width"
+interesting_feature2 = "length"
+
+fig, ax = plt.subplots(figsize=(8,6))
+classes = np.unique(y)
+for cls in classes:
+    mask = (y == cls)
+    ax.scatter(df.loc[mask, interesting_feature1], df.loc[mask, interesting_feature2], label=f"class {cls}")
+
+ax.set_xlabel(f" {interesting_feature1}", fontsize=12)
+ax.set_ylabel(f"{interesting_feature2}", fontsize=12)
+ax.set_title(f"{interesting_feature1} vs {interesting_feature2} (normalized)", fontsize=14)
+ax.legend(title="Class", loc="best")
+
+plt.show()
+
+#Because it shows a strong correlation between Length and width. For these two charachteristics, there is also a pretty distinct difference between the classes. 
