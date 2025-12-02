@@ -1,0 +1,132 @@
+# Codegrade Tag Question8
+# Do *not* remove the tag above
+# Implement the class below
+
+import numpy as np
+
+class SimpleLinearRegression:
+    """
+    Uses closed-form formulae to implement the simple linear regression using least squares.
+    """
+
+    def fit(self,X,y):
+        """
+        Fits the model on the observations (X,y) using least squares.
+
+        Parameters:
+        - X : n*1 array of univariate observations (independent variable)
+        - y : n array of univariate observations (dependent variable)
+
+        Return value:
+        - Returns self
+        """
+        assert isinstance(X,np.ndarray) and isinstance(y,np.ndarray)
+        assert X.ndim == 2 and y.ndim == 1
+        assert X.shape[0] == y.shape[0] and X.shape[1] == 1
+
+        # Flatten X to 1D for computation convenience
+        x = X[:, 0]
+
+        # Compute means
+        x_mean = np.mean(x)
+        y_mean = np.mean(y)
+
+        # Compute slope (beta)
+        numerator = np.sum((x - x_mean) * (y - y_mean))
+        denominator = np.sum((x - x_mean)**2)
+        beta = numerator / denominator
+
+        # Compute intercept (alpha)
+        alpha = y_mean - beta * x_mean
+
+        # Store parameters exactly as sklearn does:
+        self.coef_ = np.array([beta])      # slope stored in 1-element array
+        self.intercept_ = float(alpha)     # intercept as plain float
+
+        return self
+
+    def predict(self,X):
+        """
+        Returns model predictions y = a+b*x for all observations given as input.
+
+        Parameters:
+        - X : n*1 array of univariate observations
+
+        Return value:
+        - An array of length n of predictions
+        """
+        assert isinstance(X,np.ndarray)
+        assert X.ndim == 2 and X.shape[1] == 1
+
+        x = X[:, 0]
+        return self.intercept_ + self.coef_[0] * x
+
+# Codegrade Tag Question9
+# Do *not* remove the tag above
+# Write your code below
+
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+df_train, df_test = train_test_split(df, test_size=0.25, random_state=1337)
+numerical_features = df_train.select_dtypes(include=[np.number]).columns.tolist() # hitta numeriska features
+corrs = df_train[numerical_features].corr()['compactness'] # Räkna ut korrelationer mot "compactness"
+corrs = corrs.drop('compactness') # Ta bort compactness själv
+#Hitta den feature med högst absolut korrelation
+most_correlated_feature = corrs.abs().idxmax()
+most_correlated_feature_corr = corrs[most_correlated_feature]
+
+# Codegrade Tag Question10
+# Do *not* remove the tag above
+# Write your code below
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+import numpy as np
+
+X_train_q10 = df_train[[most_correlated_feature]].values #Välj den mest korrelerade featuren från föregående fråga
+y_train_q10 = df_train["compactness"].values
+
+X_test_q10 = df_test[[most_correlated_feature]].values
+y_test_q10 = df_test["compactness"].values
+
+model = LinearRegression() #Träna en univariat linjär modell, skapa objektet och kör in träningsdatan nedan
+model.fit(X_train_q10, y_train_q10)
+
+r2 = model.score(X_train_q10, y_train_q10) # R² på train set
+# Prediktioner på test set
+y_pred = model.predict(X_test_q10)
+
+rms = np.sqrt(mean_squared_error(y_test_q10, y_pred))
+mae = mean_absolute_error(y_test_q10, y_pred)
+mape = np.mean(np.abs((y_test_q10 - y_pred) / y_test_q10)) * 100
+
+# Codegrade Tag Question11
+# Do *not* remove the tag above
+# Write your code below
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+X_test_vals = df_test[[most_correlated_feature]].values
+y_test_vals = df_test["compactness"].values
+
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.scatter(X_test_vals, y_test_vals, label="Test data", alpha=0.7)
+
+x_line = np.linspace(X_test_vals.min(), X_test_vals.max(), 100).reshape(-1, 1)
+y_line = model.predict(x_line)
+
+ax.plot(x_line, y_line, 'r--', label="Fitted line")
+
+ax.set_xlabel(most_correlated_feature)
+ax.set_ylabel("compactness")
+ax.set_title("Test set with fitted regression line")
+ax.legend()
+
+# The results suggest that the simple linear regression model is not very useful for predicting compactness. Although the absolute errors (RMS and MAE) are small, 
+# the very high MAPE indicates that the model performs poorly in relative terms and does not capture the true variability of the target. 
+# This means compactness is not well-explained by a single feature using a linear relationship.
+
+# However, linear regression is easy to interpret, and the coefficient still provides insight into how the selected feature influences compactness. 
+# To improve performance, a multivariate model or a nonlinear method would likely be necessary, since the relationship appears more complex than what a simple linear model can capture.
