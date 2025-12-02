@@ -1,0 +1,65 @@
+# Codegrade Tag Question4
+# Do *not* remove the tag above
+
+from sklearn.cluster import KMeans
+import numpy as np
+import matplotlib.pyplot as plt
+
+inertias = []   # inertias[i] ska vara inertian för k = i+1, plats 0 är för k=1
+
+ks = range(1, 31)  # testar k = 1,2,...,30 antal kluster
+
+for k in ks:
+    kmeans = KMeans( # Skapa KMeans-objekt
+        n_clusters=k,
+        random_state=1234 + k,   # enligt instruktionerna
+        n_init=10                # default i nya sklearn-versioner, algoritmen körs 10 gånger och väljer de kluster center med lägst intertia
+    )
+    kmeans.fit(X_pca) # Fit på PCA-datan
+    inertias.append(kmeans.inertia_) # Läs av inertia och lagra
+
+# plotta inertia som funktion av k
+fig, ax_kclusters = plt.subplots(figsize=(8, 6))
+ax_kclusters.plot(ks, inertias, marker='o')
+ax_kclusters.set_xlabel("Number of clusters (k)")
+ax_kclusters.set_ylabel("Inertia")
+ax_kclusters.set_title("Inertia as a function of k (Elbow plot)")
+
+plt.show()
+
+# A justifiable choice for the number of clusters is 3.
+# In the inertia plot, the decrease in inertia slows down noticeably after k = 3, forming an “elbow.” This indicates that adding more clusters gives diminishing returns and does not significantly improve the fit.
+
+# Codegrade Tag Question5
+# Do *not* remove the tag above
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import rand_score
+
+k = 3  # k should match the number of wheat species (3)
+kmeans = KMeans(n_clusters=k, random_state=112233, n_init=10) # Fit k-means
+labels = kmeans.fit_predict(X_pca) # gå igenom alla par
+rand_index = rand_score(y, labels) # samma cluster och ska va i samma cluster +1, ska inte vara i samma kluster och är inte det +1, annars 0
+# compute Rand Index
+
+rand_index
+
+#Codegrade Tag Question6
+# Do *not* remove the tag above
+
+import numpy as np
+from itertools import permutations
+
+k = len(np.unique(labels))          
+best_acc = 0
+
+for perm in permutations(range(k)):  # kör alla 6 permutationer för att få rätt cluster till rätt klass, funkar bara i supervised learning
+    mapped = np.array([perm[label] for label in labels]) 
+    acc = np.mean(mapped == y)
+    best_acc = max(best_acc, acc)
+
+accuracy = best_acc
+accuracy
+
+# That the clustring was supervised definately helped building good clusters, for example knowing that k=3. In real world cases, k is unkown and clustring is
+# used in unsupervised learning. That being said, the Rand Index is good at 0.9. 
