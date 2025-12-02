@@ -164,6 +164,10 @@ ax_pca.legend(title="Class", loc="best")
 
 plt.show()
 
+# The PCA projection shows that the classes are well-separated along the first principal component, 
+# meaning most of the variation relevant for distinguishing the classes lies along that axis. The second component adds some extra spread, 
+# but the main structure is largely one-dimensional. PCA therefore reveals that the dataset is highly structured and linearly separable to a large extent.
+
 # Codegrade Tag Question3c
 # Do *not* remove the tag above
 
@@ -189,3 +193,7 @@ ax_gauss.set_title("Gaussian Random Projection (2D)", fontsize=14)
 ax_gauss.legend(title="Class", loc="best")
 
 plt.show()
+
+# The Gaussian random projection produces a 2-dimensional embedding that preserves approximate pairwise distances but does not align with any meaningful directions in the original feature space.
+# Despite being random, the projection still reveals visible separation between the classes, indicating that the dataset has strong intrinsic structure.
+# However, compared to PCA, the clusters appear more distorted and rotated, since Gaussian projection does not maximize explained variance nor attempt to find meaningful orthogonal directions.
