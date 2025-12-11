@@ -115,6 +115,21 @@ def train(model, train_loader, val_loader, num_epochs, learning_rate = 0.0001):
     
     return train_losses,train_accuracies,val_losses,val_accuracies
 
+# Codegrade Tag Question2e
+# Do *not* remove the tag above
+trained = train(simple_nn, train_loader, val_loader, num_epochs=10, learning_rate=0.0001)
+state_dict = simple_nn.state_dict()
+torch.save(state_dict, 'simple_nn_trained.pth')
+fig, ax = plt.subplots(1, 1, figsize=(6, 5))
+train_losses, train_accuracies, val_losses, val_accuracies = trained
+ax.plot(range(1, 11),train_accuracies, label='Train Accuracy')
+ax.plot(range(1, 11), val_accuracies, label='Validation Accuracy')
+ax.set_xlabel('Epoch')
+ax.set_ylabel('Accuracy')
+ax.set_title('Training and Validation Accuracy')
+ax.legend()
+plt.show()
+
 
 # Codegrade Tag Question3a
 # Do *not* remove the tag above
