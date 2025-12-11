@@ -114,4 +114,53 @@ def train(model, train_loader, val_loader, num_epochs, learning_rate = 0.0001):
         val_accuracies.append(val_acc)
     
     return train_losses,train_accuracies,val_losses,val_accuracies
- 
+
+
+# Codegrade Tag Question3a
+# Do *not* remove the tag above
+
+class TwoLayerNN(nn.Module):
+    """
+    A simple neural network with two fully connected hidden layers,
+    each of which is followed by a dropout layer.
+    """
+    def __init__(self, input_size, hidden_sizes, output_size, dropout_prob):
+        """
+        Constructor.
+        Parameters:
+        - input_size: integer, the flattened vector size of inputs
+        - hidden_sizes: a tuple of two integers, the sizes of the two hidden layers
+        - output_size: number of outputs (number of classes)
+        - dropout_prob: float, probability parameter for the dropout layers
+        """
+        super().__init__()
+
+        m1, m2 = hidden_sizes  # unpack hidden layer sizes
+
+        self.network = nn.Sequential(
+            nn.Linear(input_size, m1),
+            nn.ReLU(),
+            nn.Dropout(dropout_prob),
+
+            nn.Linear(m1, m2),
+            nn.ReLU(),
+            nn.Dropout(dropout_prob),
+
+            nn.Linear(m2, output_size)
+        )
+
+    def forward(self, x):
+        """
+        Evaluates the network for the given argument x.
+        """
+        # Flatten input: [batch, 1, 28, 28] -> [batch, 784]
+        x = x.view(x.size(0), -1)
+        return self.network(x)
+
+two_layer_nn = TwoLayerNN(
+    input_size=784,
+    hidden_sizes=(512, 256),
+    output_size=10,
+    dropout_prob=0.2
+)
+
