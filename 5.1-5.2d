@@ -1,0 +1,117 @@
+# Codegrade Tag Question1
+# Do *not* remove the tag above
+
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+train_loader = DataLoader(train_subset, batch_size=64, shuffle=True)
+val_loader = DataLoader(val_subset, batch_size=64, shuffle=False)
+test_loader = DataLoader(test_set, batch_size=64, shuffle=False)
+
+iter_train = iter(train_loader)
+images, labels = next(iter_train)
+batch_labels = labels  
+
+fig, axs = plt.subplots(2, 5, figsize=(10, 5))
+axs = axs.ravel()
+for i in range(10):
+    axs[i].imshow(images[i].squeeze(), cmap='gray')
+    axs[i].set_title(f'Label: {batch_labels[i].item()}', va = "bottom")
+    axs[i].axis('off')
+plt.tight_layout()
+plt.show()
+
+# Codegrade Tag Question2a
+# Do *not* remove the tag above
+
+import torch.nn as nn
+import torch
+
+class SimpleNN(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super().__init__()
+
+        # Build the network as required
+        self.network = nn.Sequential(
+            nn.Linear(input_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, output_size)
+        )
+
+    def forward(self, x):
+        x = x.view(x.size(0), -1)
+        return self.network(x)
+    
+simple_nn = SimpleNN(input_size=784, hidden_size=64, output_size=10)
+
+
+# Codegrade Tag Question2b
+# Do *not* remove the tag above
+
+import torch.optim as optim
+
+def train_one_epoch(model, loader, loss_fn, optimizer):
+    model.train() 
+    losses = []
+    correct = 0
+    total = 0
+    for data, target in loader: 
+        optimizer.zero_grad()
+        output = model(data)
+        loss = loss_fn(output, target)
+        loss.backward()
+        optimizer.step()
+        
+        losses.append(loss.item())  
+        _, predicted = torch.max(output, 1)
+        total += target.size(0)
+        correct += (predicted == target).sum().item()   
+    mean_loss = sum(losses) / len(losses)
+    accuracy = correct / total
+
+    return mean_loss, accuracy
+
+# Codegrade Tag Question2c
+# Do *not* remove the tag above
+
+def evaluate(model, loader, loss_fn):
+    model.eval()
+    losses = []
+    correct = 0
+    total = 0
+    for data, target in loader: 
+        torch.no_grad()
+        output = model(data)
+        loss = loss_fn(output, target)
+        
+        losses.append(loss.item())  
+        _, predicted = torch.max(output, 1)
+        total += target.size(0)
+        correct += (predicted == target).sum().item()   
+    mean_loss = sum(losses) / len(losses)
+    accuracy = correct / total
+    return mean_loss, accuracy
+
+# Codegrade Tag Question2d
+# Do *not* remove the tag above
+
+def train(model, train_loader, val_loader, num_epochs, learning_rate = 0.0001):
+    model.train()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    loss_fn = nn.CrossEntropyLoss()
+    train_losses = []
+    train_accuracies = []
+    val_losses = []
+    val_accuracies = []
+
+    for epoch in range(num_epochs):
+        train_loss, train_acc = train_one_epoch(model, train_loader, loss_fn, optimizer)
+        train_losses.append(train_loss)
+        train_accuracies.append(train_acc)
+
+        # ---- 2. EVALUATE ON VALIDATION SET ----
+        val_loss, val_acc = evaluate(model, val_loader, loss_fn)
+        val_losses.append(val_loss)
+        val_accuracies.append(val_acc)
+    
+    return train_losses,train_accuracies,val_losses,val_accuracies
+ 
