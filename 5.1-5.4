@@ -302,3 +302,39 @@ cnn = CNN(
     dropout_probability=0.5
 )
 
+# Codegrade Tag Question4b
+# Do *not* remove the tag above
+trained = train(cnn, train_loader, val_loader, num_epochs=10, learning_rate=0.0001)
+state_dict = cnn.state_dict()
+torch.save(state_dict, 'cnn.pt')
+fig, ax = plt.subplots(1, 1, figsize=(6, 5))
+train_losses, train_accuracies, val_losses, val_accuracies = trained
+ax.plot(range(1, 11),train_accuracies, label='Train Accuracy')
+ax.plot(range(1, 11), val_accuracies, label='Validation Accuracy')
+ax.set_xlabel('Epoch')
+ax.set_ylabel('Accuracy')
+ax.set_title('Training and Validation Accuracy')
+ax.legend()
+plt.show()
+
+# Codegrade Tag Question4c
+# Do *not* remove the tag above
+cnn = CNN(
+    in_sizes=(28, 28),
+    in_channels=1,
+    conv1_channels=32,
+    conv2_channels=64,
+    conv3_channels=128,
+    kernel_size=3,
+    padding=1,
+    pool_size=2,
+    fc1_size=256,
+    fc2_size=128,
+    out_size=10,
+    dropout_probability=0.5
+)
+
+state_dict = torch.load('cnn.pt')
+cnn.load_state_dict(state_dict)
+test_loss, test_accuracy_cnn = evaluate(cnn, test_loader, nn.CrossEntropyLoss())
+print(f'Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy_cnn:.4f}') 
