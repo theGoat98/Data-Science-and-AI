@@ -119,7 +119,7 @@ def train(model, train_loader, val_loader, num_epochs, learning_rate = 0.0001):
 # Do *not* remove the tag above
 trained = train(simple_nn, train_loader, val_loader, num_epochs=10, learning_rate=0.0001)
 state_dict = simple_nn.state_dict()
-torch.save(state_dict, 'simple_nn_trained.pth')
+torch.save(state_dict, 'simple_nn.pt')
 fig, ax = plt.subplots(1, 1, figsize=(6, 5))
 train_losses, train_accuracies, val_losses, val_accuracies = trained
 ax.plot(range(1, 11),train_accuracies, label='Train Accuracy')
@@ -129,6 +129,14 @@ ax.set_ylabel('Accuracy')
 ax.set_title('Training and Validation Accuracy')
 ax.legend()
 plt.show()
+
+# Codegrade Tag Question2f
+# Do *not* remove the tag above
+simple_nn = SimpleNN(input_size=784, hidden_size=64, output_size=10)
+state_dict = torch.load('simple_nn.pt')
+simple_nn.load_state_dict(state_dict)
+test_loss, test_accuracy_simple = evaluate(simple_nn, test_loader, nn.CrossEntropyLoss())
+print(f'Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy_simple:.4f}') 
 
 
 # Codegrade Tag Question3a
