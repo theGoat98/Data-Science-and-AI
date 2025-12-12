@@ -186,6 +186,28 @@ two_layer_nn = TwoLayerNN(
     output_size=10,
     dropout_prob=0.2
 )
+# Codegrade Tag Question3b
+# Do *not* remove the tag above
+trained = train(two_layer_nn, train_loader, val_loader, num_epochs=10, learning_rate=0.0001)
+state_dict = two_layer_nn.state_dict()
+torch.save(state_dict, 'two_layer_nn.pt')
+fig, ax = plt.subplots(1, 1, figsize=(6, 5))
+train_losses, train_accuracies, val_losses, val_accuracies = trained
+ax.plot(range(1, 11),train_accuracies, label='Train Accuracy')
+ax.plot(range(1, 11), val_accuracies, label='Validation Accuracy')
+ax.set_xlabel('Epoch')
+ax.set_ylabel('Accuracy')
+ax.set_title('Training and Validation Accuracy')
+ax.legend()
+plt.show()
+
+# Codegrade Tag Question3c
+# Do *not* remove the tag above
+two_layer_nn = TwoLayerNN(input_size=784, hidden_sizes=(512, 256), output_size=10, dropout_prob=0.2)
+state_dict = torch.load('two_layer_nn.pt')
+two_layer_nn.load_state_dict(state_dict)
+test_loss, test_accuracy_two_layer = evaluate(two_layer_nn, test_loader, nn.CrossEntropyLoss())
+print(f'Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy_two_layer:.4f}') 
 
 # Codegrade Tag Question4a
 # Do *not* remove the tag above
