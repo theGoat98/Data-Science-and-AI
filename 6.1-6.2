@@ -1,0 +1,44 @@
+#UPPG 1
+rag.add_document('ai_act_en.pdf')
+question = "What obligations does the EU AI Act impose on high-risk AI systems?"
+answer, sources = rag.query(question)
+print("ANSWER:\n", answer)
+print("\nSOURCES:\n", sources)
+rag.reset()
+"""
+ANSWER:
+ According to the provided text, the EU AI Act imposes various obligations on high-risk AI systems. These include:
+
+1. Harmonized rules for placing on the market, putting into service, and using AI systems in the EU.
+2. Requirements and obligations for providers of general-purpose AI models that are suitable to cover relevant obligations.
+3. Measures to support innovation, particularly for small and medium-sized enterprises (SMEs), including startups.
+4. A focus on human-centered approach to AI and being a global leader in developing secure, trustworthy, and ethical AI.
+
+These obligations are designed to ensure that high-risk AI systems operate safely, securely, and in compliance with relevant requirements and standards in the EU.
+
+SOURCES:
+ ['ai_act_en.pdf:21:2', 'ai_act_en.pdf:17:6', 'ai_act_en.pdf:1:6', 'ai_act_en.pdf:43:5', 'ai_act_en.pdf:30:0']
+"""
+
+#UPPG 2
+rag.add_document("moccamaster_manual_fi.pdf")
+question = "What should i do if my Moccamaster coffee maker breaks?"
+answer, sources = rag.query(question)
+print("ANSWER:\n", answer)
+print("\nSOURCES:\n", sources)
+rag.reset()
+"""
+ANSWER:
+ Moccamaster -kahvinkeittimen on tarkoitus suodata. 
+
+Energiatehokkuus ja kierrätettävyys ovat merkittäviä tekijöitä jokaisen Technivorm Moccamaster -kahvinkeittimen suunnittelussa, mutta myös keittimeen puhdistaminen on tärkeää. 
+
+Myyttämättömän Moccamaster -kahvinkeittimen voi poistaa astianpesukoneesta ennen puhdistaustaa. Puhdista keitin säännöllisesti ulkopuolelta kostealla liinalla ja pyyhi kuivaksi. 
+
+Keitin ei saa pestä astianpesukoneessa, joka on myös Moccamaster -kahvinkeittimen käyttämättömän toiminnan edistämisestä suhtautuneen.
+
+Mokkamaster -kahvinkeittimen keittimelle ei anneta puhdistaustaa.
+
+SOURCES:
+ ['moccamaster_manual_fi.pdf:1:4', 'moccamaster_manual_fi.pdf:2:4', 'moccamaster_manual_fi.pdf:10:3', 'moccamaster_manual_fi.pdf:2:5', 'moccamaster_manual_fi.pdf:9:0']
+"""
