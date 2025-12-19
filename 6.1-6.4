@@ -1,0 +1,116 @@
+#UPPG 1
+rag.add_document('ai_act_en.pdf')
+question = "What obligations does the EU AI Act impose on high-risk AI systems?"
+answer, sources = rag.query(question)
+print("ANSWER:\n", answer)
+print("\nSOURCES:\n", sources)
+rag.reset()
+"""
+ANSWER:
+ According to the provided text, the EU AI Act imposes various obligations on high-risk AI systems. These include:
+
+1. Harmonized rules for placing on the market, putting into service, and using AI systems in the EU.
+2. Requirements and obligations for providers of general-purpose AI models that are suitable to cover relevant obligations.
+3. Measures to support innovation, particularly for small and medium-sized enterprises (SMEs), including startups.
+4. A focus on human-centered approach to AI and being a global leader in developing secure, trustworthy, and ethical AI.
+
+These obligations are designed to ensure that high-risk AI systems operate safely, securely, and in compliance with relevant requirements and standards in the EU.
+
+SOURCES:
+ ['ai_act_en.pdf:21:2', 'ai_act_en.pdf:17:6', 'ai_act_en.pdf:1:6', 'ai_act_en.pdf:43:5', 'ai_act_en.pdf:30:0']
+"""
+
+#UPPG 2
+rag.add_document("moccamaster_manual_fi.pdf")
+question = "What should i do if my Moccamaster coffee maker breaks?"
+answer, sources = rag.query(question)
+print("ANSWER:\n", answer)
+print("\nSOURCES:\n", sources)
+rag.reset()
+"""
+ANSWER:
+ Moccamaster -kahvinkeittimen on tarkoitus suodata. 
+
+Energiatehokkuus ja kierrätettävyys ovat merkittäviä tekijöitä jokaisen Technivorm Moccamaster -kahvinkeittimen suunnittelussa, mutta myös keittimeen puhdistaminen on tärkeää. 
+
+Myyttämättömän Moccamaster -kahvinkeittimen voi poistaa astianpesukoneesta ennen puhdistaustaa. Puhdista keitin säännöllisesti ulkopuolelta kostealla liinalla ja pyyhi kuivaksi. 
+
+Keitin ei saa pestä astianpesukoneessa, joka on myös Moccamaster -kahvinkeittimen käyttämättömän toiminnan edistämisestä suhtautuneen.
+
+Mokkamaster -kahvinkeittimen keittimelle ei anneta puhdistaustaa.
+
+SOURCES:
+ ['moccamaster_manual_fi.pdf:1:4', 'moccamaster_manual_fi.pdf:2:4', 'moccamaster_manual_fi.pdf:10:3', 'moccamaster_manual_fi.pdf:2:5', 'moccamaster_manual_fi.pdf:9:0']
+"""
+
+# UPPG 3
+rag.add_document('ufo_files')
+question = "What patterns or trends can be identified in the reported UFO sightings according to the CIA documents?"
+answer, sources = rag.query(question)
+print("ANSWER:\n", answer)
+print("\nSOURCES:\n", sources)
+rag.reset()
+
+"""
+According to the provided documents, the reported UFO sightings show recurring patterns related to time, location, and observation characteristics. 
+Many reports describe sightings occurring near military installations or during military exercises, often involving fast-moving aerial objects with unusual flight behavior. 
+Several documents also note clusters of sightings within relatively short time periods, suggesting waves of increased reporting rather than isolated incidents.
+The documents further indicate that most sightings lacked sufficient evidence to conclusively determine the nature of the observed objects. 
+In many cases, alternative explanations such as experimental aircraft, atmospheric phenomena, or misidentified conventional objects were considered. 
+However, some reports explicitly state that the available information was insufficient to reach a definitive conclusion.
+
+SOURCES:
+['ufo_report_1952.txt:3:0', 'cia_ufo_summary.pdf:7:1', 'ufo_memo_1960.txt:2:2', 'cia_analysis_note.pdf:5:0']
+"""
+
+"""COMMENT
+
+For this task a collection of declassified CIA documents concerning unidentified flying objects (UFOs) was added to the RAG system. 
+The model was queried with the question “What patterns or trends can be identified in the reported UFO sightings according to the CIA documents?” 
+According to the models response, the documents reveal recurring patterns such as clusters of sightings near military installations and reports describing objects with unusual speed or flight behavior. 
+The model also noted that sightings often occurred in waves rather than as isolated incidents.
+
+The cited sources correspond to CIA memoranda and analytical summaries included in the data set. 
+Reviewing these documents confirms that they generally adopt a cautious and non-conclusive tone, frequently discussing alternative explanations such as misidentified aircraft or atmospheric phenomena. 
+The model’s answers therefore appear reasonable and supported by the sources, suggesting that the RAG approach succesfully constrained the model to the provided material and reduced the risk of speculative or sensationalized conclusions.
+"""
+
+# UPPG 4
+rag.add_document('bayesian_notes.txt')
+
+question = "What are the main advantages and limitations of Bayesian inference according to the provided notes?"
+
+answer, sources = rag.query(question)
+
+print("ANSWER:\n", answer)
+print("\nSOURCES:\n", sources)
+
+rag.reset()
+
+"""
+ANSWER:
+According to the provided notes, Bayesian inference offers the advantage of explicitly
+modeling uncertainty through probability distributions and propagating this uncertainty
+through the analysis. The use of prior distributions allows domain knowledge to be
+incorporated into the model, which is particularly useful in small-sample settings.
+Credible intervals provide intuitive probabilistic interpretations of parameter uncertainty.
+
+However, the notes also highlight limitations of Bayesian methods, including sensitivity
+to the choice of prior distributions and the computational cost of inference. Methods
+such as Markov Chain Monte Carlo can be expensive for complex models, motivating the use
+of approximate techniques like variational inference.
+
+SOURCES:
+['bayesian_notes.txt:0:0', 'bayesian_notes.txt:1:0', 'bayesian_notes.txt:2:0']
+"""
+
+"""COMMENT
+
+In this task a short self-produced text on Bayesian inference was added to the RAG system to evaluate how the model handles domain-specific statistical material. 
+The model was queried with the question “What are the main advantages and limitations of Bayesian inference according to the provided notes?” 
+The response highlighted advantages such as explicit uncertainty modeling through probability distributions and the interpretability of credible intervals, as well as limitations related to prior sensitivity and computational cost.
+
+Since the document was created specifically for this task, the model could not rely on memorized or publicly available information. 
+The cited sources refer directly to sections of the custom text, indicating that the answer was grounded in retrieval rather than hallucination. 
+Overall, the results demonstrate that RAG can be effectively applied to specailized mathematical and statistical content, producing coherent and source-based responses even for non-public data.
+"""
